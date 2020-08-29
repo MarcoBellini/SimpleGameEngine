@@ -1,0 +1,145 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B9F9D4A6-D6A5-4BA9-94D6-5C6698AFEE7C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>VBDirect2D</RootNamespace>
+    <AssemblyName>VBDirect2D</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <MyType>Windows</MyType>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>VBDirect2D.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>VBDirect2D.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionExplicit>On</OptionExplicit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionCompare>Binary</OptionCompare>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionStrict>Off</OptionStrict>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionInfer>On</OptionInfer>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Xml.Linq" />
+    <Import Include="System.Threading.Tasks" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Direct2D\Functions.vb" />
+    <Compile Include="Direct2D\Guids.vb" />
+    <Compile Include="Direct2D\HRESULT.vb" />
+    <Compile Include="Direct2D\ID2D1Bitmap.vb" />
+    <Compile Include="Direct2D\ID2D1BitmapBrush.vb" />
+    <Compile Include="Direct2D\ID2D1BitmapRenderTarget.vb" />
+    <Compile Include="Direct2D\ID2D1Brush.vb" />
+    <Compile Include="Direct2D\ID2D1DCRenderTarget.vb" />
+    <Compile Include="Direct2D\ID2D1DrawingStateBlock.vb" />
+    <Compile Include="Direct2D\ID2D1EllipseGeometry.vb" />
+    <Compile Include="Direct2D\ID2D1Factory.vb" />
+    <Compile Include="Direct2D\ID2D1Geometry.vb" />
+    <Compile Include="Direct2D\ID2D1GeometryGroup.vb" />
+    <Compile Include="Direct2D\ID2D1GradientStopCollection.vb" />
+    <Compile Include="Direct2D\ID2D1HwndRenderTarget.vb" />
+    <Compile Include="Direct2D\ID2D1Image.vb" />
+    <Compile Include="Direct2D\ID2D1Layer.vb" />
+    <Compile Include="Direct2D\ID2D1LinearGradientBrush.vb" />
+    <Compile Include="Direct2D\ID2D1Mesh.vb" />
+    <Compile Include="Direct2D\ID2D1PathGeometry.vb" />
+    <Compile Include="Direct2D\ID2D1RadialGradientBrush.vb" />
+    <Compile Include="Direct2D\ID2D1RectangleGeometry.vb" />
+    <Compile Include="Direct2D\ID2D1RenderTarget.vb" />
+    <Compile Include="Direct2D\ID2D1Resource.vb" />
+    <Compile Include="Direct2D\ID2D1RoundedRectangleGeometry.vb" />
+    <Compile Include="Direct2D\ID2D1SimplifiedGeometrySink.vb" />
+    <Compile Include="Direct2D\ID2D1SolidColorBrush.vb" />
+    <Compile Include="Direct2D\ID2D1StrokeStyle.vb" />
+    <Compile Include="Direct2D\ID2D1TessellationSink.vb" />
+    <Compile Include="Direct2D\ID2D1TransformedGeometry.vb" />
+    <Compile Include="Direct2D\IDWriteFactory.vb" />
+    <Compile Include="Direct2D\IDWriteRenderingParams .vb" />
+    <Compile Include="Direct2D\IDWriteTextFormat.vb" />
+    <Compile Include="Direct2D\IDWriteTextLayout.vb" />
+    <Compile Include="Direct2D\IDXGISurface.vb" />
+    <Compile Include="Direct2D\IWICBitmap.vb" />
+    <Compile Include="Direct2D\IWICBitmapDecoder.vb" />
+    <Compile Include="Direct2D\IWICBitmapFrameDecode .vb" />
+    <Compile Include="Direct2D\IWICBitmapSource.vb" />
+    <Compile Include="Direct2D\IWICFormatConverter.vb" />
+    <Compile Include="Direct2D\IWICImagingFactory.vb" />
+    <Compile Include="Direct2D\StructAndEnums.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+</Project>
