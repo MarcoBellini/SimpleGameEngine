@@ -34,7 +34,7 @@ Partial Class MainForm
         Me.MaximumSize = New System.Drawing.Size(400, 400)
         Me.MinimumSize = New System.Drawing.Size(400, 400)
         Me.Name = "MainForm"
-        Me.Text = "Snake 2D"
+        Me.Text = "Test Window"
         Me.ResumeLayout(False)
 
     End Sub

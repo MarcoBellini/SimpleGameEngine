@@ -37,6 +37,19 @@ Namespace Direct2D
 
         End Function
 
+        'void WINAPI
+        'D2D1MakeRotateMatrix(
+        '    _In_ FLOAT angle,
+        '    _In_ D2D1_POINT_2F center,
+        '    _Out_ D2D1_MATRIX_3X2_F *matrix
+        '    );
+        <DllImport("d2d1.dll", SetLastError:=True)>
+        Public Sub D2D1MakeRotateMatrix(<[In]()> ByVal angle As Single,
+                                        <[In](), MarshalAs(UnmanagedType.Struct)> ByVal center As D2D1_POINT_2F,
+                                        <Out(), MarshalAs(UnmanagedType.Struct)> ByRef matrix As D2D1_MATRIX_3X2_F)
+
+        End Sub
+
         ''' <summary>
         ''' Returns the Identity Matrix
         ''' </summary>
@@ -56,6 +69,15 @@ Namespace Direct2D
                 Return Identity
             End Get
         End Property
+
+        Public Function RotatationMatrix(ByVal angle As Single,
+                                         ByVal center As D2D1_POINT_2F) As D2D1_MATRIX_3X2_F
+            Dim FinalMatrix As New D2D1_MATRIX_3X2_F
+
+            D2D1MakeRotateMatrix(angle, center, FinalMatrix)
+
+            Return FinalMatrix
+        End Function
     End Module
 End Namespace
 

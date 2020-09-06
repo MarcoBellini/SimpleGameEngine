@@ -33,6 +33,13 @@ Public Class SimpleGameEngine
         CurrentKeysState = New List(Of Keys)
     End Sub
 
+    ''' <summary>
+    ''' Start new Rendering Loop
+    ''' </summary>
+    ''' <param name="Frm">Form where Draw</param>
+    ''' <param name="Width">Width of Render scene</param>
+    ''' <param name="Height">Height of render scende</param>
+    ''' <returns></returns>
     Public Function Start(ByVal Frm As Form, ByVal Width As Integer, ByVal Height As Integer) As Boolean
 
         ' Check if Handle is valid
@@ -66,6 +73,10 @@ Public Class SimpleGameEngine
         Return True
     End Function
 
+    ''' <summary>
+    ''' Close opened rendering loop
+    ''' </summary>
+    ''' <returns>True if successful</returns>
     Public Function Close() As Boolean
 
         ' Check if thread is initialized
@@ -82,9 +93,17 @@ Public Class SimpleGameEngine
             UpdateThread.Abort()
         End If
 
+        ' Free
+        UpdateThread = Nothing
+
         Return True
     End Function
 
+    ''' <summary>
+    ''' Resize rendering area
+    ''' </summary>
+    ''' <param name="Width">New Width</param>
+    ''' <param name="Height">New Height</param>
     Public Sub Resize(ByVal Width As Integer, ByVal Height As Integer)
 
         ' Change render size
@@ -92,6 +111,11 @@ Public Class SimpleGameEngine
         NewSize.height = Height
     End Sub
 
+    ''' <summary>
+    ''' Check if a key is pressed
+    ''' </summary>
+    ''' <param name="key">Key to check</param>
+    ''' <returns>True if key is pressed otherwise false</returns>
     Public Function IsKeyPressed(ByVal key As Keys) As Boolean
         If CurrentKeysState IsNot Nothing Then
             Return CurrentKeysState.Contains(key)
@@ -110,6 +134,85 @@ Public Class SimpleGameEngine
         End If
     End Sub
 
+    Protected Sub DrawLine(ByRef StartPoint As PointF, ByRef EndPoint As PointF, ByRef Brush As ID2D1Brush)
+        If Brush IsNot Nothing Then
+            If Target.SafeObject IsNot Nothing Then
+                Target.SafeObject.DrawLine(Point2Unmanaged(StartPoint),
+                                           Point2Unmanaged(EndPoint),
+                                           Brush)
+            End If
+        End If
+    End Sub
+
+    Protected Sub DrawTriangle(ByRef Point0 As PointF, ByRef Point1 As PointF, ByRef Point2 As PointF, ByRef Brush As ID2D1Brush)
+        If Brush IsNot Nothing Then
+            If Target.SafeObject IsNot Nothing Then
+
+                ' Sort by distance from origin (0,0) - Use Lambda
+                Dim d0, d1, d2 As Single
+
+                d0 = (Point0.X * Point0.X) + (Point0.Y * Point0.Y)
+                d1 = (Point1.X * Point1.X) + (Point1.Y * Point1.Y)
+                d2 = (Point2.X * Point2.X) + (Point2.Y * Point2.Y)
+
+                Dim SwapPoints = Sub(ByRef p0 As PointF, ByRef p1 As PointF)
+                                     Dim TempPoint As New PointF
+
+                                     TempPoint.X = p0.X
+                                     TempPoint.Y = p0.Y
+
+                                     p0 = p1
+                                     p1 = TempPoint
+                                 End Sub
+
+
+                If d1 < d0 Then
+
+                    If d1 < d2 Then
+                        SwapPoints(Point0, Point1)
+#If DEBUG Then
+                        Debug.WriteLine("Swap p0 <-> p1")
+#End If
+                    Else
+                        SwapPoints(Point0, Point2)
+
+#If DEBUG Then
+                        Debug.WriteLine("Swap p0 <-> p2")
+#End If
+                    End If
+                Else
+                    If d2 < d0 Then
+                        SwapPoints(Point0, Point2)
+
+#If DEBUG Then
+                        Debug.WriteLine("Swap p0 <-> p2")
+#End If
+                    Else
+                        If d2 < d1 Then
+                            SwapPoints(Point1, Point2)
+
+#If DEBUG Then
+                            Debug.WriteLine("Swap p1 <-> p2")
+#End If
+                        End If
+                    End If
+                End If
+
+
+                ' Draw triangle
+                Target.SafeObject.DrawLine(Point2Unmanaged(Point0),
+                                           Point2Unmanaged(Point1),
+                                           Brush)
+                Target.SafeObject.DrawLine(Point2Unmanaged(Point1),
+                                           Point2Unmanaged(Point2),
+                                           Brush)
+                Target.SafeObject.DrawLine(Point2Unmanaged(Point2),
+                                           Point2Unmanaged(Point0),
+                                           Brush)
+            End If
+        End If
+    End Sub
+
     Protected Sub FillRectangle(ByRef Rect As RectangleF, ByRef Brush As ID2D1Brush)
         If Brush IsNot Nothing Then
             If Target.SafeObject IsNot Nothing Then
@@ -122,6 +225,49 @@ Public Class SimpleGameEngine
         If Brush IsNot Nothing Then
             If Target.SafeObject IsNot Nothing Then
                 Target.SafeObject.DrawRectangle(Rect2Unmanaged(Rect), Brush)
+            End If
+        End If
+    End Sub
+
+    Protected Sub DrawCircle(ByRef Location As PointF, ByVal Radius As Single, ByRef Brush As ID2D1Brush)
+        If Brush IsNot Nothing Then
+            If Target.SafeObject IsNot Nothing Then
+                Dim Ellipse As D2D1_ELLIPSE
+                Dim CurrentLocation As D2D1_POINT_2F
+
+                ' Convert to Direct2D Location
+                With CurrentLocation
+                    .x = Location.X
+                    .y = Location.Y
+                End With
+
+                ' Fill Ellipse struct
+                With Ellipse
+                    .point = CurrentLocation
+                    .radiusX = Radius
+                    .radiusY = Radius
+                End With
+
+                ' Draw Ellipse
+                Target.SafeObject.DrawEllipse(Ellipse, Brush)
+            End If
+        End If
+    End Sub
+
+    Protected Sub FillCircle(ByRef Location As PointF, ByVal Radius As Single, ByRef Brush As ID2D1Brush)
+        If Brush IsNot Nothing Then
+            If Target.SafeObject IsNot Nothing Then
+                Dim Ellipse As D2D1_ELLIPSE
+
+                ' Fill Ellipse struct
+                With Ellipse
+                    .point = Point2Unmanaged(Location)
+                    .radiusX = Radius
+                    .radiusY = Radius
+                End With
+
+                ' Draw Ellipse
+                Target.SafeObject.FillEllipse(Ellipse, Brush)
             End If
         End If
     End Sub
@@ -142,6 +288,20 @@ Public Class SimpleGameEngine
                                                    Brush)
                     End If
                 End If
+            End If
+        End If
+    End Sub
+
+    Protected Sub DrawImage(ByRef Image As ID2D1Bitmap,
+                            ByRef SourceRect As RectangleF,
+                            ByRef DestRect As RectangleF)
+        If Target.SafeObject IsNot Nothing Then
+            If Image IsNot Nothing Then
+                Target.SafeObject.DrawBitmap(Image,
+                                             Rect2Unmanaged(DestRect),
+                                             1.0F,
+                                             D2D1_BITMAP_INTERPOLATION_MODE.D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
+                                             Rect2Unmanaged(SourceRect))
             End If
         End If
     End Sub
@@ -176,6 +336,18 @@ Public Class SimpleGameEngine
         UnmanagedRect.bottom = Rect.Bottom
 
         Return UnmanagedRect
+    End Function
+
+    Private Function Point2Unmanaged(ByRef ManagedPoint As PointF) As D2D1_POINT_2F
+        ' Convert managed PointF to Direct2D Point
+
+        Dim UnmanagedPoint As D2D1_POINT_2F
+
+        UnmanagedPoint.x = ManagedPoint.X
+        UnmanagedPoint.y = ManagedPoint.Y
+
+
+        Return UnmanagedPoint
     End Function
 
     Private Function Color2Unmanaged(ByRef ColorToConvert As Color) As D2D1_COLOR_F
@@ -269,7 +441,14 @@ Public Class SimpleGameEngine
 
                     ' Render block
                     Target.SafeObject.BeginDraw()
+
+                    ' Reset trasforms
+                    Target.SafeObject.SetTransform(IdentityMatrix)
+
+                    ' Call overridable function
                     OnFrameUpdate(fElapsed)
+
+                    ' End Draw
                     Target.SafeObject.EndDraw()
 
 
@@ -323,24 +502,18 @@ Public Class SimpleGameEngine
     Protected Overridable Sub Dispose(disposing As Boolean)
         If Not disposedValue Then
             If disposing Then
-                ' TODO: eliminare lo stato gestito (oggetti gestiti)
+                Close()
             End If
 
-            ' TODO: liberare risorse non gestite (oggetti non gestiti) ed eseguire l'override del finalizzatore
-            ' TODO: impostare campi di grandi dimensioni su Null
             disposedValue = True
         End If
     End Sub
-
-    ' ' TODO: eseguire l'override del finalizzatore solo se 'Dispose(disposing As Boolean)' contiene codice per liberare risorse non gestite
-    ' Protected Overrides Sub Finalize()
-    '     ' Non modificare questo codice. Inserire il codice di pulizia nel metodo 'Dispose(disposing As Boolean)'
-    '     Dispose(disposing:=False)
-    '     MyBase.Finalize()
-    ' End Sub
+    Protected Overrides Sub Finalize()
+        Dispose(disposing:=False)
+        MyBase.Finalize()
+    End Sub
 
     Public Sub Dispose() Implements IDisposable.Dispose
-        ' Non modificare questo codice. Inserire il codice di pulizia nel metodo 'Dispose(disposing As Boolean)'
         Dispose(disposing:=True)
         GC.SuppressFinalize(Me)
     End Sub

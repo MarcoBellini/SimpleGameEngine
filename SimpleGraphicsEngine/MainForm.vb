@@ -3,7 +3,7 @@ Imports System.ComponentModel
 
 Public Class MainForm
 
-    Private TestGame As New SnakeGameTest
+    Private TestGame As New ShooterTest
 
     Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         TestGame.Start(Me, Width, Height)
