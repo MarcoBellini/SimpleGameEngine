@@ -70,7 +70,7 @@ Namespace Direct2D
             End Get
         End Property
 
-        Public Function RotatationMatrix(ByVal angle As Single,
+        Public Function RotationMatrix(ByVal angle As Single,
                                          ByVal center As D2D1_POINT_2F) As D2D1_MATRIX_3X2_F
             Dim FinalMatrix As New D2D1_MATRIX_3X2_F
 

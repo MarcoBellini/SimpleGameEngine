@@ -114,8 +114,11 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="TestClasses\ShooterTest.vb" />
+    <Compile Include="TestClasses\SpaceShooter\BaseObject.vb" />
+    <Compile Include="TestClasses\SpaceShooter\Particle.vb" />
+    <Compile Include="TestClasses\SpaceShooter\ShooterTest.vb" />
     <Compile Include="TestClasses\SnakeGameTest.vb" />
+    <Compile Include="TestClasses\SpaceShooter\Vector2.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MainForm.resx">
@@ -140,6 +143,7 @@
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
     <None Include="App.config" />
+    <None Include="TestClasses\SpaceShooter\map.ini" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
@@ -158,6 +162,11 @@
       <Project>{b9f9d4a6-d6a5-4ba9-94d6-5c6698afee7c}</Project>
       <Name>VBDirect2D</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TestClasses\SpaceShooter\sprites.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

@@ -28,11 +28,11 @@ Partial Class MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(384, 361)
+        Me.ClientSize = New System.Drawing.Size(784, 561)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
         Me.MaximizeBox = False
-        Me.MaximumSize = New System.Drawing.Size(400, 400)
-        Me.MinimumSize = New System.Drawing.Size(400, 400)
+        Me.MaximumSize = New System.Drawing.Size(800, 600)
+        Me.MinimumSize = New System.Drawing.Size(800, 600)
         Me.Name = "MainForm"
         Me.Text = "Test Window"
         Me.ResumeLayout(False)
