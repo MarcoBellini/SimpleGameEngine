@@ -1,7 +1,9 @@
 ﻿Imports VBDirect2D.Direct2D
 Imports System.Runtime.InteropServices
 Imports System.Threading
+Imports Microsoft.Win32.SafeHandles
 
+#Region "Game Engine"
 ''' <summary>
 ''' Main Engine class
 ''' </summary>
@@ -691,7 +693,7 @@ Public Class SimpleGameEngine
     End Class
 #End Region
 End Class
-
+#End Region
 #Region "SmartPointer Emulator Class"
 Public Class SmartPointer(Of T)
     Implements IDisposable
@@ -733,6 +735,471 @@ Public Class SmartPointer(Of T)
 
             End If
 
+
+            disposedValue = True
+        End If
+    End Sub
+
+    Protected Overrides Sub Finalize()
+        Dispose(disposing:=False)
+        MyBase.Finalize()
+    End Sub
+
+    Public Sub Dispose() Implements IDisposable.Dispose
+        Dispose(disposing:=True)
+        GC.SuppressFinalize(Me)
+    End Sub
+End Class
+#End Region
+#Region "Audio Engine"
+
+''' <summary>
+''' Audio Engine, Create Object in OnSessionCreate() function
+''' </summary>
+Public Class SimpleAudioEngine
+    Implements IDisposable
+
+#Region "SafeWaveOutHandle"
+    Public Class SafeWaveOutHandle
+        Inherits SafeHandleZeroOrMinusOneIsInvalid
+
+        Public Sub New()
+            MyBase.New(True)
+        End Sub
+
+        Public Sub New(ByVal device As IntPtr)
+            MyBase.New(True)
+            handle = device
+        End Sub
+
+        Protected Overrides Function ReleaseHandle() As Boolean
+#If DEBUG Then
+            Debug.WriteLine("SafeWaveOutHandle: " & "Handle correctrly Closed")
+#End If
+            Return waveOutClose(handle) = 0
+        End Function
+    End Class
+#End Region
+#Region "WaveOut Native Declaration"
+
+    <StructLayout(LayoutKind.Sequential)>
+    Public Class WaveHdr
+        Public lpData As IntPtr 'pointer To locked data buffer
+        Public dwBufferLength As Int32 'length Of data buffer
+        Public dwBytesRecorded As Int32 'used For input only
+        Public dwUser As IntPtr 'For client's use
+        Public dwFlags As Int32 'assorted flags (see defines)
+        Public dwLoops As Int32 'Loop control counter
+        Public lpNext As IntPtr ' PWaveHdr, reserved For driver
+        Public reserved As Int32 'reserved For driver
+    End Class
+
+    Public Enum WaveFormats As Short
+        Unknown = 0
+        PCM = 1
+        Adpcm = 2
+        Float = 3
+        alaw = 6
+        mulaw = 7
+    End Enum
+
+    <StructLayoutAttribute(LayoutKind.Sequential)>
+    Public Structure WaveFormat
+        Public wFormatTag As Int16
+        Public nChannels As Int16
+        Public nSamplesPerSec As Int32
+        Public nAvgBytesPerSec As Int32
+        Public nBlockAlign As Int16
+        Public wBitsPerSample As Int16
+        Public cbSize As Int16
+    End Structure
+
+    <StructLayout(LayoutKind.Explicit)>
+    Public Structure MMTIME
+        <FieldOffset(0)> Public wType As TimeType
+        <FieldOffset(4)> Public ms As UInteger
+        <FieldOffset(4)> Public sample As UInteger
+        <FieldOffset(4)> Public cb As UInteger
+        <FieldOffset(4)> Public ticks As UInteger
+        <FieldOffset(4)> Public smtpeHour As Byte
+        <FieldOffset(5)> Public smpteMin As Byte
+        <FieldOffset(6)> Public smpteSec As Byte
+        <FieldOffset(7)> Public smpteFrame As Byte
+        <FieldOffset(8)> Public smpteFps As Byte
+        <FieldOffset(9)> Public smpteDummy As Byte
+        <FieldOffset(10)> Public smptePad0 As Byte
+        <FieldOffset(11)> Public smptePad1 As Byte
+        <FieldOffset(4)> Public midiSongPtrPos As UInteger
+    End Structure
+
+    Public Enum TimeType As UInteger
+        TIME_MS = &H1
+        TIME_SAMPLES = &H2
+        TIME_BYTES = &H4
+        TIME_SMPTE = &H8
+        TIME_MIDI = &H10
+        TIME_TICKS = &H20
+    End Enum
+
+    <DllImport("winmm.dll")>
+    Public Shared Function waveOutOpen(ByRef hWaveOut As IntPtr, ByVal uDeviceID As Int32, ByRef lpFormat As WaveFormat, ByVal dwCallback As WaveOutProc, ByVal dwInstance As IntPtr, ByVal dwFlags As Int32) As Int32
+    End Function
+    <DllImport("winmm.dll")>
+    Public Shared Function waveOutReset(ByVal hWaveOut As SafeWaveOutHandle) As Int32
+    End Function
+    <DllImport("winmm.dll")>
+    Public Shared Function waveOutRestart(ByVal hWaveOut As SafeWaveOutHandle) As Int32
+    End Function
+    <DllImport("winmm.dll")>
+    Public Shared Function waveOutPause(ByVal hWaveOut As SafeWaveOutHandle) As Int32
+    End Function
+    <DllImport("winmm.dll")>
+    Public Shared Function waveOutPrepareHeader(ByVal hWaveOut As SafeWaveOutHandle, ByVal lpWaveOutHdr As IntPtr, ByVal uSize As Int32) As Int32
+    End Function
+    <DllImport("winmm.dll")>
+    Public Shared Function waveOutUnprepareHeader(ByVal hWaveOut As SafeWaveOutHandle, ByVal lpWaveOutHdr As IntPtr, ByVal uSize As Int32) As Int32
+    End Function
+    <DllImport("winmm.dll")>
+    Public Shared Function waveOutWrite(ByVal hWaveOut As SafeWaveOutHandle, ByVal lpWaveOutHdr As IntPtr, ByVal uSize As Int32) As Int32
+    End Function
+    <DllImport("winmm.dll")>
+    Public Shared Function waveOutClose(ByVal hWaveOut As IntPtr) As Int32
+    End Function
+    <DllImport("winmm.dll")>
+    Public Shared Function waveOutSetVolume(ByVal hWaveOut As SafeWaveOutHandle, ByVal dwVolume As UInt32) As Int32
+    End Function
+    <DllImport("winmm.dll")>
+    Public Shared Function waveOutGetVolume(ByVal hWaveOut As SafeWaveOutHandle, ByRef dwVolume As UInt32) As Int32
+    End Function
+    <DllImport("winmm.dll")>
+    Public Shared Function waveOutGetNumDevs() As Int32
+    End Function
+    <DllImport("winmm.dll")>
+    Public Shared Function waveOutGetPosition(ByVal hWaveOut As SafeWaveOutHandle, ByRef pmmt As MMTIME, ByVal cbmmt As Integer) As Int32
+    End Function
+
+    Public Delegate Sub WaveOutProc(ByVal dev As IntPtr, ByVal uMsg As Integer, ByVal dwUser As Integer, ByVal dwParam1 As IntPtr, ByVal dwParam2 As Integer)
+
+    Public Const CALLBACK_FUNCTION As Integer = &H30000
+    Public Const WAVE_FORMAT_DIRECT As Integer = &H8
+    Public Const CALLBACK_NULL As Integer = &H0
+    Public Const BUFFER_DONE As Integer = &H3BD
+
+#End Region
+
+    Private pHandle As SafeWaveOutHandle
+    Private woDone As WaveOutProc = New WaveOutProc(AddressOf WaveOutDone)
+    Private disposedValue As Boolean
+    Private ptrDataQueue As New Queue(Of IntPtr)
+    Private ptrStructureQueue As New Queue(Of IntPtr)
+
+
+    Private DeletePacketThread As Thread
+    Private DeleteEvent As AutoResetEvent
+    Private bAllowThread As Boolean
+
+
+    Public Sub New()
+        Dim sWaveFormat As New WaveFormat
+        Dim TempHandle As IntPtr
+
+        ' Setup waveformat
+        With sWaveFormat
+            .nAvgBytesPerSec = 176400
+            .nBlockAlign = 4
+            .nChannels = 2
+            .nSamplesPerSec = 44100
+            .wBitsPerSample = 16
+            .wFormatTag = WaveFormats.PCM
+            .cbSize = 0
+        End With
+
+        'Check if system has audio device
+        If waveOutGetNumDevs() = 0 Then
+            Throw New Exception("No Audio Device Found")
+        End If
+
+        ' Create New wave format object(-1 = WAVE_MAPPER)
+        waveOutOpen(TempHandle,
+                    -1,
+                    sWaveFormat,
+                    woDone,
+                    IntPtr.Zero,
+                    CALLBACK_FUNCTION Or WAVE_FORMAT_DIRECT)
+
+        ' Create new safe handle
+        pHandle = New SafeWaveOutHandle(TempHandle)
+
+        DeleteEvent = New AutoResetEvent(False)
+        bAllowThread = True
+
+        ' Start new thread
+        DeletePacketThread = New Thread(AddressOf DeleteThreadProc)
+        DeletePacketThread.IsBackground = True
+        DeletePacketThread.Start()
+    End Sub
+
+    ' Callback of waveOutOpen(important to flush old buffer and 
+    ' write the new one)
+    Private Sub WaveOutDone(ByVal dev As IntPtr, ByVal uMsg As Integer, ByVal dwUser As Integer, ByVal dwParam1 As IntPtr, ByVal dwParam2 As Integer)
+        If uMsg = BUFFER_DONE Then
+            DeleteEvent.Set()
+        End If
+    End Sub
+
+    Private Sub DeleteThreadProc()
+        Dim pWaveHdrOld As IntPtr
+        Dim Index As Integer
+
+        While bAllowThread
+            ' Wait to delete object
+            Index = WaitHandle.WaitAny({DeleteEvent}, 25)
+
+            If Index <> WaitHandle.WaitTimeout Then
+                If ptrStructureQueue.Count > 0 Then
+                    pWaveHdrOld = ptrStructureQueue.Dequeue
+
+#If DEBUG Then
+                    Debug.WriteLine("Free WaveOut Header: " & ptrStructureQueue.Count.ToString)
+#End If
+
+
+                    waveOutUnprepareHeader(pHandle, pWaveHdrOld, Marshal.SizeOf(GetType(WaveHdr)))
+
+                    Marshal.FreeHGlobal(ptrDataQueue.Dequeue)
+                    Marshal.FreeHGlobal(pWaveHdrOld)
+                End If
+            End If
+
+        End While
+    End Sub
+
+
+    Public Sub PlaySound(ByRef data As SimpleAudioResource)
+        Dim pBuffer, pWaveHdr As IntPtr
+        Dim sWaveHdr As New WaveHdr
+        Dim Buffer() As Byte
+        Dim BufferLen As Integer
+
+        ' Get buffer details
+        Buffer = data.GetBuffer()
+        BufferLen = data.GetBufferLen()
+
+        ' Copy byte to unmanaged memory
+        pBuffer = New IntPtr
+        pBuffer = Marshal.AllocHGlobal(BufferLen)
+        Marshal.Copy(Buffer, 0, pBuffer, BufferLen)
+
+        ' Fill wave hdr struct
+        sWaveHdr.lpData = pBuffer
+        sWaveHdr.dwBufferLength = BufferLen
+        sWaveHdr.dwUser = IntPtr.Zero
+        sWaveHdr.dwFlags = 0
+        sWaveHdr.dwLoops = 0
+
+        ' Alloc unmanaged memory for struct
+        pWaveHdr = New IntPtr
+        pWaveHdr = Marshal.AllocHGlobal(Marshal.SizeOf(sWaveHdr))
+        Marshal.StructureToPtr(sWaveHdr, pWaveHdr, True)
+
+        ' Add pointers to queues
+        ptrDataQueue.Enqueue(pBuffer)
+        ptrStructureQueue.Enqueue(pWaveHdr)
+
+        ' Prepare data for playing
+        waveOutPrepareHeader(pHandle, pWaveHdr, Marshal.SizeOf(sWaveHdr))
+        waveOutWrite(pHandle, pWaveHdr, Marshal.SizeOf(sWaveHdr))
+    End Sub
+
+    Protected Overridable Sub Dispose(disposing As Boolean)
+        If Not disposedValue Then
+
+            ' Close thread
+            bAllowThread = False
+
+            ' TODO: Don't work??
+            'If DeletePacketThread.IsAlive Then
+            ' DeletePacketThread.Abort()
+            'End If
+
+
+            ' Free waveout
+            pHandle.Dispose()
+            disposedValue = True
+        End If
+    End Sub
+
+    Protected Overrides Sub Finalize()
+        Dispose(disposing:=False)
+        MyBase.Finalize()
+    End Sub
+
+    Public Sub Dispose() Implements IDisposable.Dispose
+        Dispose(disposing:=True)
+        GC.SuppressFinalize(Me)
+    End Sub
+End Class
+
+Public Class SimpleAudioResource
+    Implements IDisposable
+
+    Private AudioBuffer() As Byte
+    Private BufferLen As Integer
+    Private disposedValue As Boolean
+
+    Public Sub New(ByVal Path As String)
+        Dim IOStream As IO.FileStream
+        Dim Reader As IO.BinaryReader
+
+        Dim buffer(3) As Byte
+        Dim AudioFormat As Short
+        Dim ChunkSize, Subchunk1Size, Subchunk2Size As Integer
+        Dim nHeaderOffset As Long = 0
+
+        Dim Samplerate, AvgBytesPerSec As Integer
+        Dim BitsPerSample, Channels, BlockAlign As Short
+
+        If Not My.Computer.FileSystem.FileExists(Path) Then
+            Throw New IO.FileNotFoundException(Path)
+        End If
+
+        ' Create new instances of main classes
+        IOStream = New IO.FileStream(Path, IO.FileMode.Open)
+        Reader = New IO.BinaryReader(IOStream)
+
+
+        ' Start reading to 0
+        Reader.BaseStream.Seek(0, IO.SeekOrigin.Begin)
+
+        ' (1) Read ChunkID
+        '     -> Offset: 0 , Size: 4 byte
+        Reader.Read(buffer, 0, 4)
+
+        ' Check if contains Ascii code 0x52494646 - "R" "I" "F" "F" 
+        ' NB: big-endian form
+        If (buffer(0) = &H52) And (buffer(1) = &H49) And
+           (buffer(2) = &H46) And (buffer(3) = &H46) Then
+
+            ' (2) Read ChunkSize 
+            '     -> Offset 4, Size: 4
+            ChunkSize = Reader.ReadInt32()
+            'ChunkSize= 36 + SubChunk2Size, or more precisely:
+            '4 + (8 + SubChunk1Size) + (8 + SubChunk2Size)
+            'This Is the size of the rest of the chunk 
+            'following this number.  This Is the size of the 
+            'entire File in bytes minus 8 bytes for the
+            'two fields Not included in this count
+            'ChunkID And ChunkSize (little endian)
+
+            ' (3) Read Format 
+            '     -> Offset 8, Size: 4
+            Reader.Read(buffer, 0, 4)
+
+            'Check if contains Ascii code 0x57415645 "W" "A" "V" "E"
+            ' NB: big-endian form
+            If (buffer(0) = &H57) And (buffer(1) = &H41) And
+                   (buffer(2) = &H56) And (buffer(3) = &H45) Then
+
+                ' (4) Subchunk1ID
+                '     -> Offset 12, Size: 4
+                Reader.Read(buffer, 0, 4)
+
+                'Check if contains Ascii code  0x666d7420  "f""m""t"
+                ' NB: big-endian form
+                If (buffer(0) = &H66) And (buffer(1) = &H6D) And
+                       (buffer(2) = &H74) And (buffer(3) = &H20) Then
+
+                    ' 16 for PCM. This is the size of the
+                    ' rest of the Subchunk which follows this number
+                    Subchunk1Size = Reader.ReadInt32()
+
+                    ' Check if the format is PCM 
+                    If Subchunk1Size = 16 Then
+
+                        ' PCM=1 if PCM without compression
+                        AudioFormat = Reader.ReadInt16()
+
+                        ' Check again if the format is PCM 
+                        If AudioFormat = 1 Then
+
+                            ' Read channel 16 bit
+                            Channels = Reader.ReadInt16()
+
+                            ' Read Samplerate 32 bit
+                            Samplerate = Reader.ReadInt32()
+
+                            ' Read ByteRate 32 bit
+                            AvgBytesPerSec = Reader.ReadInt32()
+
+                            ' Read block align 16 bit
+                            BlockAlign = Reader.ReadInt16()
+
+                            ' Read Bits per sample 16 bit
+                            BitsPerSample = Reader.ReadInt16()
+
+                            If (Channels <> 2) Or (Samplerate <> 44100) Or (BitsPerSample <> 16) Then
+                                Throw New NotSupportedException("WaveFormat not supported")
+                            End If
+
+                            ' (5) Subchunk2ID
+                            '     -> Offset 36, Size: 4
+                            Reader.Read(buffer, 0, 4)
+
+                            'Check if contains Ascii code 0x64617461   "D""A""T""A"
+                            ' NB: big-endian form
+                            If (buffer(0) = &H64) And (buffer(1) = &H61) And
+                                   (buffer(2) = &H74) And (buffer(3) = &H61) Then
+
+                                ' Data size 
+                                Subchunk2Size = Reader.ReadInt32()
+
+                                ' Current header size
+                                ' 44 byte is the offset from the origin where
+                                ' start to read PCM byte samples
+                                nHeaderOffset = Reader.BaseStream.Position()
+
+                                ' Align variables
+                                BufferLen = Reader.BaseStream.Length - nHeaderOffset
+
+                                ' Read Entire buffer
+                                ReDim AudioBuffer(BufferLen - 1)
+                                Reader.BaseStream.Seek(nHeaderOffset, IO.SeekOrigin.Begin)
+                                AudioBuffer = Reader.ReadBytes(BufferLen)
+                            Else
+                                Throw New NotSupportedException("WaveFormat not supported")
+                            End If
+                        Else
+                            Throw New NotSupportedException("WaveFormat not supported")
+                        End If
+                    Else
+                        Throw New NotSupportedException("WaveFormat not supported")
+                    End If
+                Else
+                    Throw New NotSupportedException("WaveFormat not supported")
+                End If
+            Else
+                Throw New NotSupportedException("WaveFormat not supported")
+            End If
+        Else
+            Throw New NotSupportedException("WaveFormat not supported")
+        End If
+
+        Reader.Dispose()
+        IOStream.Dispose()
+    End Sub
+
+    Public Function GetBuffer() As Byte()
+        Return AudioBuffer
+    End Function
+
+    Public Function GetBufferLen() As Integer
+        Return BufferLen
+    End Function
+
+    Protected Overridable Sub Dispose(disposing As Boolean)
+        If Not disposedValue Then
+            AudioBuffer = Nothing
+            BufferLen = 0
 
             disposedValue = True
         End If

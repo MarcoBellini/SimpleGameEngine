@@ -8,7 +8,7 @@ Public Class ShooterTest
     Private Shared ReadOnly MAP_NAME As String = My.Application.Info.DirectoryPath + "\TestClasses\SpaceShooter\map.ini"
     Private Shared ReadOnly SPRITE_IMAGE As String = My.Application.Info.DirectoryPath + "\TestClasses\SpaceShooter\sprites.png"
     Private Shared ReadOnly EXPLOSION_WAV As String = My.Application.Info.DirectoryPath + "\TestClasses\SpaceShooter\rumble.wav"
-    Private Shared ReadOnly LASER_WAV As String = My.Application.Info.DirectoryPath + "\TestClasses\SpaceShooter\laser4.wav"
+    Private Shared ReadOnly LASER_WAV As String = My.Application.Info.DirectoryPath + "\TestClasses\SpaceShooter\laser1.wav"
 
 
     Private Shared ReadOnly STARS_NUMBER As Integer = 200
@@ -29,6 +29,10 @@ Public Class ShooterTest
     Private TextBrush As SimpleSolidColorBrush
     Private ManagedFont As Font
     Private FontObject As SimpleFontResource
+
+    Private AudioEngine As SimpleAudioEngine
+    Private ExplosionAudioResource As SimpleAudioResource
+    Private ShootAudioResource As SimpleAudioResource
 
     Private fGameTimeLine As Single
 
@@ -118,6 +122,7 @@ Public Class ShooterTest
         fPlayerTimer += PLAYER_BULLET_RATE
 
         'My.Computer.Audio.Play(LASER_WAV)
+        AudioEngine.PlaySound(ShootAudioResource)
     End Sub
 
     Private Sub CreateEnemyShoot(ByRef Enemy As BaseObject, ByVal fElapsed As Single)
@@ -132,7 +137,10 @@ Public Class ShooterTest
 
             BulletObject.ObjectVisible = True
             ObjectList.Add(BulletObject)
+
+            ' AudioEngine.PlaySound(ShootAudioResource)
         End If
+
 
     End Sub
 
@@ -141,7 +149,7 @@ Public Class ShooterTest
         Dim fAngle As Single
 
 
-        For i As Integer = 0 To 360 Step 2
+        For i As Integer = 0 To 360 Step 8
             fAngle = i * Math.PI / 180.0F
             Part = New Particle(Obj.Position.X, Obj.Position.Y, 2.0F, Rand.Next(200, 400))
             Part.VelX = Math.Cos(fAngle)
@@ -149,7 +157,8 @@ Public Class ShooterTest
             ParticlesList.Add(Part)
         Next
 
-        My.Computer.Audio.Play(EXPLOSION_WAV)
+        'My.Computer.Audio.Play(EXPLOSION_WAV)
+        AudioEngine.PlaySound(ExplosionAudioResource)
     End Sub
 
     Private Sub LoadMap()
@@ -216,6 +225,11 @@ Public Class ShooterTest
         BulletBrush = New SimpleSolidColorBrush(Color.Red, Target.SafeObject)
         ParticleBrush = New SimpleSolidColorBrush(Color.Yellow, Target.SafeObject)
         TextBrush = New SimpleSolidColorBrush(Color.White, Target.SafeObject)
+
+        ' Create audio resources
+        AudioEngine = New SimpleAudioEngine()
+        ExplosionAudioResource = New SimpleAudioResource(EXPLOSION_WAV)
+        ShootAudioResource = New SimpleAudioResource(LASER_WAV)
 
         'Create font
         ManagedFont = New Font("Arial", 12, FontStyle.Bold)
@@ -457,7 +471,11 @@ Public Class ShooterTest
                 ObjectList.RemoveAt(nIndex)
                 nObjectToDelete -= 1
                 nObjectsCount -= 1
+
+#If DEBUG Then
                 Debug.WriteLine("Deleted 1 objects at index: " + nIndex.ToString)
+#End If
+
             Else
                 nIndex += 1
             End If
@@ -489,7 +507,10 @@ Public Class ShooterTest
                 ParticlesList.RemoveAt(nIndex)
                 nObjectToDelete -= 1
                 nObjectsCount -= 1
+#If DEBUG Then
                 Debug.WriteLine("Deleted 1 Particle at index: " + nIndex.ToString)
+#End If
+
             Else
                 nIndex += 1
             End If
