@@ -896,7 +896,7 @@ Public Class SimpleAudioEngine
 
     Private DeletePacketThread As Thread
     Private DeleteEvent As AutoResetEvent
-    Private bAllowThread As Boolean
+    Private Shared bAllowThread As Boolean
 
 
     Public Sub New()
@@ -1018,10 +1018,12 @@ Public Class SimpleAudioEngine
             bAllowThread = False
 
             ' TODO: Don't work??
-            'If DeletePacketThread.IsAlive Then
-            ' DeletePacketThread.Abort()
-            'End If
+            If disposing Then
+                If DeletePacketThread.IsAlive Then
+                    DeletePacketThread.Abort()
+                End If
 
+            End If
 
             ' Free waveout
             pHandle.Dispose()

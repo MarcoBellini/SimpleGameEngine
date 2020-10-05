@@ -22,6 +22,7 @@ Public Class ShooterTest
     Private Shared ReadOnly ASTEROID_RECT As New RectangleF(178, 10, 23, 20)
     Private Shared ReadOnly LIFE_RECT As New RectangleF(213, 7, 19, 26)
 
+    ' Graphics Resources
     Private SpritesImage As SimpleImageResource
     Private BulletBrush As SimpleSolidColorBrush
     Private StarBrush As SimpleSolidColorBrush
@@ -30,21 +31,21 @@ Public Class ShooterTest
     Private ManagedFont As Font
     Private FontObject As SimpleFontResource
 
+    ' Audio Resources
     Private AudioEngine As SimpleAudioEngine
     Private ExplosionAudioResource As SimpleAudioResource
     Private ShootAudioResource As SimpleAudioResource
 
-    Private fGameTimeLine As Single
-
+    ' Game oBjects
     Private StarsList(STARS_NUMBER - 1) As PointF
     Private ObjectList As List(Of BaseObject)
-
     Private ParticlesList As List(Of Particle)
-
     Private PlayerObject As BaseObject
 
     Private Rand As New Random
     Private fPlayerTimer As Single
+    Private fGameTimeLine As Single
+    Private nPlayerScore As Integer
 
 
 #Region "Kernel32 API"
@@ -121,7 +122,6 @@ Public Class ShooterTest
         ObjectList.Add(BulletObject)
         fPlayerTimer += PLAYER_BULLET_RATE
 
-        'My.Computer.Audio.Play(LASER_WAV)
         AudioEngine.PlaySound(ShootAudioResource)
     End Sub
 
@@ -138,7 +138,7 @@ Public Class ShooterTest
             BulletObject.ObjectVisible = True
             ObjectList.Add(BulletObject)
 
-            ' AudioEngine.PlaySound(ShootAudioResource)
+
         End If
 
 
@@ -157,7 +157,6 @@ Public Class ShooterTest
             ParticlesList.Add(Part)
         Next
 
-        'My.Computer.Audio.Play(EXPLOSION_WAV)
         AudioEngine.PlaySound(ExplosionAudioResource)
     End Sub
 
@@ -254,6 +253,9 @@ Public Class ShooterTest
 
         ' Create Explosion Particles List
         ParticlesList = New List(Of Particle)
+
+        ' Reset score
+        nPlayerScore = 0
 
         MyBase.OnSessionCreate()
     End Sub
@@ -390,14 +392,13 @@ Public Class ShooterTest
 
                 If PlayerObject.ObjectLife < 0 Then
                     ' End game!
-                    MsgBox("End game!")
+                    MsgBox("End game! Score: " & nPlayerScore.ToString)
                     Environment.Exit(0)
                 End If
             End If
 
 
         Next
-
 
         ' player enemy bullet
         For i As Integer = 0 To ObjectList.Count - 1
@@ -415,6 +416,7 @@ Public Class ShooterTest
                                     If ObjectList(j).ObjectLife <= 0 Then
                                         ObjectList(j).DeleteObject = True
                                         CreateExplosion(ObjectList(j))
+                                        nPlayerScore += 10
                                     End If
 
                                 Case BaseObject.ObjectType.EnemyEasy
@@ -424,6 +426,7 @@ Public Class ShooterTest
                                     If ObjectList(j).ObjectLife <= 0 Then
                                         ObjectList(j).DeleteObject = True
                                         CreateExplosion(ObjectList(j))
+                                        nPlayerScore += 20
                                     End If
                                 Case BaseObject.ObjectType.EnemyMedium
                                     ObjectList(i).DeleteObject = True
@@ -432,6 +435,7 @@ Public Class ShooterTest
                                     If ObjectList(j).ObjectLife <= 0 Then
                                         ObjectList(j).DeleteObject = True
                                         CreateExplosion(ObjectList(j))
+                                        nPlayerScore += 30
                                     End If
                                 Case BaseObject.ObjectType.EnemyHard
                                     ObjectList(i).DeleteObject = True
@@ -440,6 +444,7 @@ Public Class ShooterTest
                                     If ObjectList(j).ObjectLife <= 0 Then
                                         ObjectList(j).DeleteObject = True
                                         CreateExplosion(ObjectList(j))
+                                        nPlayerScore += 40
                                     End If
 
                             End Select
@@ -527,7 +532,13 @@ Public Class ShooterTest
 
         ' Draw Player life
         DrawText("Life: " + PlayerObject.ObjectLife.ToString,
-                 New RectangleF(0, 0, 300, 60),
+                 New RectangleF(0, 0, 80, 60),
+                 TextBrush.CurrentColor.SafeObject,
+                 FontObject.CurrentFont.SafeObject)
+
+        ' Draw Player Score
+        DrawText("Score: " + nPlayerScore.ToString,
+                 New RectangleF(90, 0, 80, 60),
                  TextBrush.CurrentColor.SafeObject,
                  FontObject.CurrentFont.SafeObject)
 
